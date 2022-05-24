@@ -162,4 +162,72 @@ const userLogin = async function (req, res) {
     }
 }
 
-module.exports = { registerUser, userLogin }
+const getDetails = async function(req,res){
+    try{
+        let userid=req.params.userId
+
+ 
+        if (!validation.validObjectId(userid)){
+            return res.status(400).send({ status:false,message: "Invalid type of userId"})
+        }
+        let userData=await userModel.findById({_id:userid})
+        if(!userData){
+            return res.status(404).send({ status:false,message:"user not found"})
+        }
+        return res.status(200).send({ status: true, message: "Details fetched successfully", data: userData})
+        
+    }
+       
+    
+    catch (error) {
+        return res.status(500).send({ status: false, err: error.message })
+    }
+}
+
+
+//=================================================update userDetails==============================================================
+// PUT /user/:userId/profile (Authentication and Authorization required)
+// Allow an user to update their profile.
+// A user can update all the fields
+// Make sure that userId in url param and in token is same
+// Response format
+// On success - Return HTTP status 200. Also return the updated user document. The response should be a JSON object like this
+// On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
+const updateDetails= async function(req,res){
+    try{
+        let userId= req.params.userId
+        let data= req.body
+        if (!validation.validObjectId(userId)){
+            return res.status(400).send({ status:false,message: "Invalid type of userId"})
+        }
+        if(!validation.validBody(data)){
+            return res.status(400).send({status:false, message: "please provide data in requestBody to update"})
+        }
+        let user = await userModel.findById({_id:userId})
+        if(!user){
+            return res.status(400).send({status:false, message: "No user found"})
+        }
+        let exist= await userModel.findOne({email:data.email,phone:data.phone})
+        if(exist){
+            return res.status(400).send({status:false, message: "Already Exists"})
+        }
+        
+        let files = req.files
+        if (files && files.length > 0) {
+
+            let uploadedFileURL = await validation.uploadFile(files[0])
+            data.profileImage = uploadedFileURL
+        }
+        
+
+
+
+    }
+    catch (error) {
+        return res.status(500).send({ status: false, err: error.message })
+    }
+
+}
+
+
+module.exports = { registerUser, userLogin, getDetails}

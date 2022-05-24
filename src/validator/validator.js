@@ -1,4 +1,5 @@
 const aws = require('aws-sdk')
+const mongoose = require('mongoose')
 
 
 const isValid= function(value){
@@ -18,6 +19,10 @@ const emailValid = function(email){
 
 const mobileValid= function(mobile){
     return (/^((\+91?)?0?)?[6-9]\d{9}$/).test(mobile)
+}
+
+const validObjectId= function(objectId){
+    return mongoose.Types.ObjectId.isValid(objectId)
 }
 
 
@@ -47,4 +52,4 @@ let uploadFile= async ( file) =>{
     })
  }
 
-module.exports={isValid,validBody,emailValid,mobileValid,uploadFile}
+module.exports={isValid,validBody,emailValid,mobileValid,uploadFile,validObjectId}
