@@ -206,9 +206,9 @@ const updateDetails= async function(req,res){
         if(!user){
             return res.status(400).send({status:false, message: "No user found"})
         }
-        // if (fname ="" && !validation.isValid(fname)) {
-        // return res.status(400).send({ status: false, message: "fname is required" })
-        // }
+        if (fname =" " && !validation.isValid(fname)) {
+        return res.status(400).send({ status: false, message: "fname is required" })
+        }
         // if (lname && !validation.isValid(lname)) {
         //     return res.status(400).send({ status: false, message: "lname is required" })
         // }
