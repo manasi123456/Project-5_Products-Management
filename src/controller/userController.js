@@ -51,7 +51,7 @@ const registerUser = async function (req, res) {
             data.profileImage = uploadedFileURL
         }
         else {
-            res.status(400).send({ msmessageg: "file required" })
+          return  res.status(400).send({ msmessageg: "file required" })
         }
         // phone
         if (!validation.isValid(phone)) {
@@ -71,7 +71,10 @@ const registerUser = async function (req, res) {
         if (!(password.length >= 8 && password.length <= 15)) {
             return res.status(400).send({ status: false, message: "Password minimum length is 8 and maximum is 15." })
         }
-
+        if(data.password){
+        let newHashPass = await bcrypt.hash(data.password, 10)
+        data.password = newHashPass
+        }
         if (!validation.isValid(address)) {
             return res.status(400).send({ status: false, message: "address is required" })
         }
@@ -162,6 +165,9 @@ const userLogin = async function (req, res) {
     }
 }
 
+
+// =================================get details=====================================
+
 const getDetails = async function(req,res){
     try{
         let userid=req.params.userId
@@ -171,32 +177,25 @@ const getDetails = async function(req,res){
             return res.status(400).send({ status:false,message: "Invalid type of userId"})
         }
         let userData=await userModel.findById({_id:userid})
+    
         if(!userData){
             return res.status(404).send({ status:false,message:"user not found"})
         }
         return res.status(200).send({ status: true, message: "Details fetched successfully", data: userData})
-        
-    }
-       
-    
+    }    
     catch (error) {
         return res.status(500).send({ status: false, err: error.message })
     }
 }
 
 
-//=================================================update userDetails==============================================================
-// PUT /user/:userId/profile (Authentication and Authorization required)
-// Allow an user to update their profile.
-// A user can update all the fields
-// Make sure that userId in url param and in token is same
-// Response format
-// On success - Return HTTP status 200. Also return the updated user document. The response should be a JSON object like this
-// On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
+// ========================================updateDetails============================================
+
 const updateDetails= async function(req,res){
     try{
         let userId= req.params.userId
         let data= req.body
+        let {fname,lname,password,email,phone,address,profileImage}=data
         if (!validation.validObjectId(userId)){
             return res.status(400).send({ status:false,message: "Invalid type of userId"})
         }
@@ -207,19 +206,42 @@ const updateDetails= async function(req,res){
         if(!user){
             return res.status(400).send({status:false, message: "No user found"})
         }
-        let exist= await userModel.findOne({email:data.email,phone:data.phone})
+        // if (fname ="" && !validation.isValid(fname)) {
+        // return res.status(400).send({ status: false, message: "fname is required" })
+        // }
+        // if (lname && !validation.isValid(lname)) {
+        //     return res.status(400).send({ status: false, message: "lname is required" })
+        // }
+    
+        // email
+        if(email){
+        if (!validation.isValid(email)) {
+            return res.status(400).send({ status: false, message: "email is required" })
+        }
+    
+        if (!validation.emailValid(email)) {
+            return res.status(400).send({ status: false, message: "Please enter Valid Email" })
+        }
+    }
+        let exist= await userModel.findOne({email:email,phone:phone})
         if(exist){
             return res.status(400).send({status:false, message: "Already Exists"})
         }
+
+        if(password){
+            let newHashPass = await bcrypt.hash(password, 10)
+            password = newHashPass
+            }
         
         let files = req.files
         if (files && files.length > 0) {
 
             let uploadedFileURL = await validation.uploadFile(files[0])
-            data.profileImage = uploadedFileURL
+            profileImage = uploadedFileURL
         }
-        
-
+        const update={fname,lname,email,phone,password,profileImage,address};
+        let updadeData= await userModel.findOneAndUpdate({_id:userId},update,{new:true})
+        return res.send({data:updadeData})
 
 
     }
@@ -229,5 +251,4 @@ const updateDetails= async function(req,res){
 
 }
 
-
-module.exports = { registerUser, userLogin, getDetails}
+module.exports = { registerUser, userLogin ,getDetails, updateDetails}
