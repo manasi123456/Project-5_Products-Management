@@ -2,16 +2,18 @@ const jwt= require('jsonwebtoken')
 
 const auth = async function(req,res,next) {
     try{
-        let token=req.headers["x-api-key"]
-        if(!token){
-            return res.status(403).send({status:false,message: "token not found"})
-        }
-        const decodedToken=jwt.verify(token, "uranium_project-5_group_30" )
-        if(!decodedToken){
-            return res.status(403).send({status:false,message: "Invalid token"})
-        }
-        req.userId = decodedToken.id
-        next()
+        let token = req.headers["authorization"]
+        if(!token)
+        return res.status(401).send({status: false, msg:"Token is not present"})
+          
+
+        let bearer = token && token.split(' ')[1];
+        let decodedToken =  jwt.verify(bearer,"uranium_project-5_group_30")
+        if(!decodedToken)
+        return res.status(401).send({status:false,msg:"Token is invalid"})
+
+        req.userid = decodedToken.userId
+    next()
 
     }
     catch(err){
