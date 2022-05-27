@@ -51,7 +51,7 @@ const registerUser = async function (req, res) {
             data.profileImage = uploadedFileURL
         }
         else {
-            return res.status(400).send({ msmessageg: "file required" })
+            return res.status(400).send({ message: "file required" })
         }
         // phone
         if (!validation.isValid(phone)) {
@@ -196,7 +196,7 @@ const updateDetails = async function (req, res) {
     try {
         let userId = req.params.userId
         let data = req.body
-        let { fname, lname, password, email, phone, profileImage, address } = data
+        let { fname, lname, password, email, phone, profileImage, address  } = data
         if (!validation.validObjectId(userId)) {
             return res.status(400).send({ status: false, message: "Invalid type of userId" })
         }
@@ -256,32 +256,17 @@ const updateDetails = async function (req, res) {
 
             let uploadedFileURL = await validation.uploadFile(files[0])
             profileImage = uploadedFileURL
+        }    
+    
+        let arr = Object.values(data)
+        for(let i = 0;i<arr.length;i++){
+            if(!validation.isValid(arr[i])) return res.status(400).send({status : false, msg : "Bad request Field"})
         }
+        let keys = Object.keys(data)
+        if(keys.indexOf("address") !== -1) return res.status(400).send({status : false, msg : "please specify what to change, either shipping or billing"})
 
-
-        if (address && !validation.isValid(address) || address == "") {
-            return res.status(400).send({ status: false, message: "address is required" })
-        }
-        // shipping addresss
-        if (address && !validation.isValid(address.shipping) || address.shipping == "") {
-            return res.status(400).send({ status: false, message: "shipping address is required" })
-        }
-        let shipping = address.shipping
-
-        const { street, city, pincode } = shipping
-
-        if (!validation.isValid(street)) {
-            return res.status(400).send({ status: false, message: "street is required" })
-        }
-        if (!validation.isValid(city)) {
-            return res.status(400).send({ status: false, message: "city is required" })
-        }
-        if (!validation.isValid(pincode)) {
-            return res.status(400).send({ status: false, message: "pincode is required" })
-        }
-        if (!/^\d{6}/.test(pincode)) {
-            return res.status(400).send({ status: false, message: "please enter 6 digit pincode" })
-        }
+        let badAddressFormat = keys.find((key) => /^address\.(billing|shipping)\.(street|city|pincode)$/.test(key))
+        if(!badAddressFormat) return res.status(400).send({status:false, msg : "address field must be right"})
 
         let update = { fname, lname, email, phone, password, profileImage, address };
         let updadeData = await userModel.findOneAndUpdate({ _id: userId }, update, { new: true })
@@ -294,6 +279,7 @@ const updateDetails = async function (req, res) {
     }
 
 }
+
 
 
 

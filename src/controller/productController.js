@@ -40,6 +40,9 @@ const addProducts = async function(req, res){
         if(availableSizes <= 0 || !validation.isValid(availableSizes)) 
         return res.status(400).send({status : false, msg : "Add Sizes"})
 
+        if(!validation.sizes(availableSizes)){
+            return res.status(400).send({status : false, msg : "Sizes only includes ['S', 'XS','M','X', 'L','XXL', 'XL']"})
+        }
         if(installments < 0)
          return res.status(400).send({status : false, msg : "Bad Installments Field"})
 
@@ -56,7 +59,7 @@ const addProducts = async function(req, res){
 const getdata = async function (req, res) {
     try {
         let query = req.query
-        if (query.length == 0) {
+        if (!validation.validBody(query)) {
 
             const datafound = await productModel.find({ isDeleted: false })
             if (!datafound) {
@@ -70,18 +73,17 @@ const getdata = async function (req, res) {
             let filter={} 
 
             if (!(size || name || priceGreaterThan || priceLessThan)) {
-                return res.status(400).send({ status: false, msg: 'query params details is required' })
+                return res.status(400).send({ status: false, msg: 'provide valid filter' })
             }
             if (size) {
 
-                if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size)) {
+                if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size))) {
                     return res.status(400).send({ staus: false, message: "Pleage enter valid size" })
                 }
                 filter.availableSizes=size;
             }
             if (name) {
                 if (!validation.isValid(name)) {
-                    console.log(name)
                     return res.status(400).send({ status: false, message: "Product name is required" })
                 }
                 filter.title = { $regex: name, $options: 'i' };
@@ -178,7 +180,7 @@ const deleteProduct = async function(req, res){
          return res.status(400).send({status : false, msg : "Invalid ObjectId"})
         }
         let findProd = await productModel.findOne({_id:productId, isDeleted : false})
-        if(!findProd) return res.status(404).send({status :false, msg : "No Product found or already Deleted"})
+        if(!findProd) return res.status(404).send({status :false, msg : "No Product found "})
 
          await productModel.findOneAndUpdate({_id : productId}, {isDeleted : true, deletedAt : Date.now()}, {new : true})
         return res.status(200).send({status : true, msg : "Success"})

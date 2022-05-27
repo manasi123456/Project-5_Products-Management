@@ -25,7 +25,9 @@ const validObjectId= function(objectId){
     return mongoose.Types.ObjectId.isValid(objectId)
 }
 
-
+const sizes= function(value){
+    return (["S", "XS","M","X", "L","XXL", "XL"].includes(value))
+}
 
 let uploadFile= async ( file) =>{
     return new Promise( function(resolve, reject) {
@@ -52,4 +54,4 @@ let uploadFile= async ( file) =>{
     })
  }
 
-module.exports={isValid,validBody,emailValid,mobileValid,uploadFile,validObjectId}
+module.exports={isValid,validBody,emailValid,mobileValid,uploadFile,validObjectId,sizes}
