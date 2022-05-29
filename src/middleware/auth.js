@@ -7,7 +7,7 @@ const auth = async function(req,res,next) {
         return res.status(401).send({status: false, msg:"Token is not present"})
           
 
-        let bearer = token && token.split(' ')[1];
+        let bearer =  token.split(' ')[1];
         let decodedToken =  jwt.verify(bearer,"uranium_project-5_group_30")
         if(!decodedToken)
         return res.status(401).send({status:false,msg:"Token is invalid"})

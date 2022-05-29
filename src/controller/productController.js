@@ -150,6 +150,7 @@ const updateProducts = async function(req, res){
     let id = req.params.productId
     let data  = req.body
     let files = req.files
+    const {title,description,price,productImage,isFreeShipping,style,installments,availableSizes}=data
     if(!validation.validObjectId(id)){
         return res.status(400).send({status:false,msg:"not a valid onjectId"})
     }
@@ -160,11 +161,50 @@ const updateProducts = async function(req, res){
     if (!validation.validBody(data)) {
         return res.status(400).send({status:false,msg:"please provide data to update"})
     }
+    if ((title && !validation.isValid(title)) || title == "") {
+        return res.status(400).send({ status: false, message: "please enter title" })
+    }
+    let sameTitle= await productModel.findOne({title})
+    if(sameTitle){
+        return res.status(400).send({ status: false, message: " title is already used" })
+    }
+
+    if ((description && !validation.isValid(description)) || description == "") {
+        return res.status(400).send({ status: false, message: "please enter description" })
+    }
+    if ((price && !validation.isValid(price)) || price == "") {
+        return res.status(400).send({ status: false, message: "please enter price" })
+    }
+    if(price && (price < 0  || !/\d/.test(price))){
+    return res.status(400).send({status : false, msg : "enter Price"})
+    }
+
+    if(availableSizes && availableSizes <= 0 || !validation.isValid(availableSizes)){ 
+    return res.status(400).send({status : false, msg : "Add Sizes"})
+    }
+
+    if(availableSizes && !validation.sizes(availableSizes)){
+        return res.status(400).send({status : false, msg : "Sizes only includes ['S', 'XS','M','X', 'L','XXL', 'XL']"})
+    }
+
+    if (installments && (!validation.isValid(installments)) || installments == "" ) {
+        return res.status(400).send({ status: false, message: "please enter installments" })
+    }
+    if(style && (!validation.isValid(style) || !/\w/.test(style))){
+        return res.status(400).send({status : false, msg : "enter style"})
+        }
+    
+    if(isFreeShipping && (!isFreeShipping.isValid(style) || !/\true|false/.test(isFreeShipping))){
+        return res.status(400).send({status : false, msg : "enter isFreeShipping"})
+        }
+    
+
     if (files && files.length > 0) {
 
         let uploadedFileURL = await validation.uploadFile(files[0])
-        data.productImage = uploadedFileURL
+        productImage = uploadedFileURL
     }
+
     let updateData = await productModel.findByIdAndUpdate({_id:id},data,{new:true})
     return res.status(200).send({status:true,message:"successfully updates",data:updateData})
     }
