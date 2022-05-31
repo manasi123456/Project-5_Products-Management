@@ -19,9 +19,9 @@ const createCart = async function (req, res) {
         }
 
         // authorization
-        if (userId != req.userid) {
-            return res.status(403).send({ status: false, message: "unauthorized user, not allowed to create cart in another user account" })
-        }
+        // if (userId != req.userid) {
+        //     return res.status(403).send({ status: false, message: "unauthorized user, not allowed to create cart in another user account" })
+        // }
 
         if (!validation.validBody(data)) {
             return res.status(400).send({ status: false, message: "please enter data to create a cart" })
@@ -38,10 +38,8 @@ const createCart = async function (req, res) {
         // check cart with user id
         let existingCart = await cartModel.findOne({ userId: userId })
 
-        let existCart = existingCart._id
-
         // check when other cart in body  i.e, different from user
-        if (cartId && existCart != cartId) {
+        if (cartId && existingCart._id != cartId) {
             return res.status(400).send({ status: false, message: " cartId not match" })
         }
         // check cart with cartId and userId

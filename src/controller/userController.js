@@ -272,16 +272,11 @@ const updateDetails = async function (req, res) {
         let update = { fname, lname, email, phone, password, profileImage, address };
         let updadeData = await userModel.findOneAndUpdate({ _id: userId }, update, { new: true })
         return res.status(200).send({ data: updadeData })
-
-
     }
     catch (error) {
         return res.status(500).send({ status: false, err: error.message })
     }
 
 }
-
-
-
 
 module.exports = { registerUser, userLogin, getDetails, updateDetails }
