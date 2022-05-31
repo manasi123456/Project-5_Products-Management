@@ -196,12 +196,13 @@ const updateDetails = async function (req, res) {
     try {
         let userId = req.params.userId
         let data = req.body
-        let { fname, lname, password, email, phone, profileImage, address  } = data
+        let { fname, lname, password, email, phone, profileImage, address } = data
         if (!validation.validObjectId(userId)) {
             return res.status(400).send({ status: false, message: "Invalid type of userId" })
         }
-        if(userId != req.userid){
-            return res.status(400).send({ status: false, message: "unauthorized user" })
+        //autorization
+        if (userId != req.userid) {
+            return res.status(403).send({ status: false, message: "unauthorized user" })
         }
 
         if (!validation.validBody(data)) {
@@ -250,23 +251,23 @@ const updateDetails = async function (req, res) {
             let newHashPass = await bcrypt.hash(data.password, 10)
             password = newHashPass
         }
-        
+
         let files = req.files
-        if ((files && files.length > 0) ) {
+        if ((files && files.length > 0)) {
 
             let uploadedFileURL = await validation.uploadFile(files[0])
             profileImage = uploadedFileURL
-        }    
-    
+        }
+
         let arr = Object.values(data)
-        for(let i = 0;i<arr.length;i++){
-            if(!validation.isValid(arr[i])) return res.status(400).send({status : false, msg : "Bad request Field"})
+        for (let i = 0; i < arr.length; i++) {
+            if (!validation.isValid(arr[i])) return res.status(400).send({ status: false, msg: "Bad request Field" })
         }
         let keys = Object.keys(data)
-        if(keys.indexOf("address") !== -1) return res.status(400).send({status : false, msg : "please specify what to change, either shipping or billing"})
+        if (keys.indexOf("address") !== -1) return res.status(400).send({ status: false, msg: "please specify what to change, either shipping or billing" })
 
         let badAddressFormat = keys.find((key) => /^address\.(billing|shipping)\.(street|city|pincode)$/.test(key))
-        if(!badAddressFormat) return res.status(400).send({status:false, msg : "address field must be right"})
+        if (!badAddressFormat) return res.status(400).send({ status: false, msg: "address field must be right" })
 
         let update = { fname, lname, email, phone, password, profileImage, address };
         let updadeData = await userModel.findOneAndUpdate({ _id: userId }, update, { new: true })
@@ -283,4 +284,4 @@ const updateDetails = async function (req, res) {
 
 
 
-module.exports = { registerUser, userLogin, getDetails, updateDetails}
+module.exports = { registerUser, userLogin, getDetails, updateDetails }
