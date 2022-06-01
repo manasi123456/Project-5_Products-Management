@@ -118,7 +118,7 @@ const getdata = async function (req, res) {
             }
             const getdata = await productModel.find({ $and: [{ isDeleted: false }, filter] }).sort({ "price": 1 })
             if (getdata.length > 0) {
-                return res.status(200).send({ staus: true, data: getdata })
+                return res.status(200).send({ staus: true,message:"Success", data: getdata })
             } else {
                 return res.status(404).send({ status: false, message: 'Product not exist' })
             }
@@ -139,14 +139,11 @@ const getProductById = async function (req, res) {
         if (!validation.validObjectId(id)) {
             return res.status(400).send({ status: false, message: "invalid productId" })
         }
-
         let products = await productModel.findOne({ _id: id, isDeleted: false })
         if (!products) {
             return res.status(404).send({ status: false, message: "product not found" })
         }
         return res.status(200).send({ status: true, message: "Success", data: products })
-
-
     } catch (err) {
         return res.status(500).send({ status: false, error: err.message })
     }
@@ -184,11 +181,12 @@ const updateProducts = async function (req, res) {
         if ((price && !validation.isValid(price)) || price == "") {
             return res.status(400).send({ status: false, message: "please enter price" })
         }
+    
         if (price && (price < 0 || !/\d/.test(price))) {
             return res.status(400).send({ status: false, message: "enter Price" })
         }
 
-        if (availableSizes && availableSizes <= 0 || !validation.isValid(availableSizes)) {
+        if (availableSizes &&  !validation.isValid(availableSizes) ||availableSizes == "") {
             return res.status(400).send({ status: false, message: "Add Sizes" })
         }
 
@@ -203,12 +201,11 @@ const updateProducts = async function (req, res) {
             return res.status(400).send({ status: false, message: "enter style" })
         }
 
-        if (isFreeShipping && (!isFreeShipping.isValid(style) || !/\true|false/.test(isFreeShipping))) {
-            return res.status(400).send({ status: false, message: "enter isFreeShipping" })
+        if (isFreeShipping && (!validation.isValid(isFreeShipping) || !/true|false/.test(isFreeShipping))) {
+            return res.status(400).send({ status: false, message: "enter is FreeShipping" })
         }
 
         if (files && files.length > 0) {
-
             let uploadedFileURL = await validation.uploadFile(files[0])
             productImage = uploadedFileURL
         }

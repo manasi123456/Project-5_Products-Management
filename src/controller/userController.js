@@ -241,7 +241,7 @@ const updateDetails = async function (req, res) {
         if (keys.indexOf("address") !== -1) return res.status(400).send({ status: false, msg: "please specify what to change, either shipping or billing" })
 
         let badAddressFormat = keys.find((key) => /^address\.(billing|shipping)\.(street|city|pincode)$/.test(key))
-        if (!badAddressFormat) return res.status(400).send({ status: false, msg: "address field must be right" })
+        if (address && !badAddressFormat) return res.status(400).send({ status: false, msg: "address field must be right" })
 
         let update = { fname, lname, email, phone, password, profileImage, address };
         let updadeData = await userModel.findOneAndUpdate({ _id: userId }, update, { new: true })
