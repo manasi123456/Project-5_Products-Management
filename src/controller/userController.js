@@ -3,7 +3,6 @@ const validation = require('../validator/validator');
 const aws = require('aws-sdk')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
-const { location } = require('express/lib/response');
 
 aws.config.update({
     accessKeyId: "AKIAY3L35MCRUJ6WPO6J",
@@ -138,7 +137,7 @@ const userLogin = async function (req, res) {
         }
         const validPassword = await bcrypt.compare(data.password, details.password);
         if (!validPassword) {
-            return res.status(401).json({ message: "inValid password" });
+            return res.status(401).send({status:false, message: "inValid password" });
         }
         // token creation
         let token = jwt.sign({ userId: id.toString() }, 'uranium_project-5_group_30', { expiresIn: "60 min" })
@@ -146,7 +145,7 @@ const userLogin = async function (req, res) {
         return res.status(200).send({ status: true, message: 'Success', data: { id, token } });
 
     } catch (error) {
-        return res.status(500).send({ status: false, err: error.message })
+        return res.status(500).send({ status: false, error: error.message })
     }
 }
 
@@ -167,7 +166,7 @@ const getDetails = async function (req, res) {
         return res.status(200).send({ status: true, message: "Success", data: userData })
     }
     catch (error) {
-        return res.status(500).send({ status: false, err: error.message })
+        return res.status(500).send({ status: false, error: error.message })
     }
 }
 

@@ -13,7 +13,7 @@ const auth = async function (req, res, next) {
         next()
     }
     catch (err) {
-        return res.status(500).send({ status: false, err: err.message })
+        return res.status(500).send({ status: false, error: err.message })
     }
 }
 

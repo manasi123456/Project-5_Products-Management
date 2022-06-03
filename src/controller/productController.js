@@ -60,7 +60,7 @@ const addProducts = async function (req, res) {
 
 
     } catch (err) {
-        res.status(500).send({ status: false, message: err.message })
+        return res.status(500).send({ status: false, error: err.message })
     }
 }
 
